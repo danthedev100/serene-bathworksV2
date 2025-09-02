@@ -1,7 +1,13 @@
 // components/shop/SortSelect.tsx
 'use client'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 
 export default function SortSelect() {
   const router = useRouter()
@@ -17,7 +23,9 @@ export default function SortSelect() {
 
   return (
     <Select value={value} onValueChange={setSort}>
-      <SelectTrigger className="w-44"><SelectValue placeholder="Sort" /></SelectTrigger>
+      <SelectTrigger className="w-44">
+        <SelectValue placeholder="Sort" />
+      </SelectTrigger>
       <SelectContent>
         <SelectItem value="new">Newest</SelectItem>
         <SelectItem value="price-asc">Price: Low → High</SelectItem>

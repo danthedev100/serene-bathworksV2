@@ -1,5 +1,5 @@
-@import "tailwindcss";
-@import "tw-animate-css";
+@import 'tailwindcss';
+@import 'tw-animate-css';
 
 @custom-variant dark (&:is(.dark *));
 
@@ -76,6 +76,9 @@
   --sidebar-accent-foreground: oklch(0.208 0.042 265.755);
   --sidebar-border: oklch(0.929 0.013 255.508);
   --sidebar-ring: oklch(0.704 0.04 256.788);
+  --sb-pink:#faefed;
+  --sb-text:#82704d;
+  --sb-gold:#ceb560;
 }
 
 .dark {
@@ -111,6 +114,10 @@
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.551 0.027 264.364);
 }
+
+html,body{ background:var(--sb-pink); }
+.font-sans{ font-family:var(--font-inter), ui-sans-serif, system-ui; }
+.font-serif{ font-family:var(--font-cormorant), ui-serif, Georgia; }
 
 @layer base {
   * {

@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json.schemastore.org/eslintrc",
+  "root": true,
+  "extends": ["next/core-web-vitals", "plugin:tailwindcss/recommended"],
+  "plugins": ["tailwindcss"],
+  "ignorePatterns": [
+    "node_modules/",
+    ".next/",
+    "coverage/",
+    "dist/",
+    "out/",
+    "lib/generated/**" // ignore Prisma’s generated runtime files
+  ],
+  "rules": {
+    "@next/next/no-img-element": "warn",
+    "no-console": ["warn", { "allow": ["warn", "error"] }],
+    "tailwindcss/classnames-order": "warn",
+    "tailwindcss/enforces-shorthand": "off",
+
+    // shadcn/ui & radix data-attributes and design tokens are not pure Tailwind classes.
+    // Disable these to avoid lots of false positives:
+    "tailwindcss/no-custom-classname": "off",
+    "tailwindcss/no-unnecessary-arbitrary-value": "off"
+  },
+  "settings": {
+    "tailwindcss": {
+      "callees": ["classnames", "ctl", "cn"],
+      "config": "tailwind.config.ts"
+    }
+  },
+  "overrides": [
+    {
+      "files": ["**/components/ui/**/*.{ts,tsx}"],
+      "rules": {
+        "tailwindcss/no-custom-classname": "off",
+        "tailwindcss/no-unnecessary-arbitrary-value": "off"
+      }
+    }
+  ]
+}

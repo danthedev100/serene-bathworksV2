@@ -1,45 +1,53 @@
-generator client {
-  provider = "prisma-client-js"
-}
-
-datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
-}
+datasource db { provider = "postgresql" url = env("DATABASE_URL") }
+generator client { provider = "prisma-client-js" }
 
 model Category {
-  id       String    @id @default(cuid())
-  name     String
-  slug     String    @unique
-  products Product[]
+  id        String    @id @default(cuid())
+  name      String    @unique
+  slug      String    @unique
+  products  Product[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 }
 
 model Product {
   id          String    @id @default(cuid())
   name        String
   slug        String    @unique
-  description String
-  images      Json
+  description String?
   categoryId  String
   category    Category  @relation(fields: [categoryId], references: [id])
   variants    Variant[]
+  active      Boolean   @default(true)
   createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 }
 
 model Variant {
-  id         String      @id @default(cuid())
-  productId  String
-  product    Product     @relation(fields: [productId], references: [id])
-  sku        String      @unique
-  size       String
-  scent      String
-  priceCents Int
-  stock      Int         @default(0)
-  active     Boolean     @default(true)
-  image      String?
-  OrderItem  OrderItem[]
+  id           String   @id @default(cuid())
+  productId    String
+  product      Product  @relation(fields: [productId], references: [id])
+  label        String               // “Rosemary”, “Lavender”, etc.
+  size         String?              // “60g”, “100g”, “500g” (optional for later)
+  priceZAR     Int
+  stock        Int       @default(0) // 0 = unavailable
+  whatsappSku  String?
+  scentNotes   String?
+  tags         String[]  @default([])
+  imageUrl     String                // e.g. "/images/bath-bombs-rose.png"
+  active       Boolean   @default(true) // can soft-disable variants
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
 
-  @@unique([productId, size, scent])
+model ContactMessage {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  phone     String?
+  subject   String
+  message   String
+  createdAt DateTime @default(now())
 }
 
 enum OrderStatus {

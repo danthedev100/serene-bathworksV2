@@ -1,42 +1,64 @@
-// app/cart/page.tsx
-'use client'
-import { useCart, totals } from '@/lib/cart'
-import Link from 'next/link'
-import { Button } from '@/components/ui/button'
+import { PrismaClient } from "@prisma/client";
+import { Palette } from "@/lib/palette";
+import ClientProductCard from "@/components/ClientProductCard";
 
-export default function CartPage(){
-  const { items, remove, setQty } = useCart()
-  const t = totals(items)
+const prisma = new PrismaClient();
+
+export default async function Page() {
+  const categories = await prisma.category.findMany({
+    include: {
+      products: {
+        where: { active: true },
+        include: { variants: { orderBy: { label: "asc" } } },
+      },
+    },
+    orderBy: { name: "asc" },
+  });
 
   return (
-    <main className="container mx-auto p-6">
-      <h1 className="text-2xl font-semibold mb-4">Your Cart</h1>
-      {items.length === 0 ? (
-        <div>Cart is empty. <Link href="/shop" className="underline">Continue shopping</Link></div>
-      ) : (
-        <div className="grid md:grid-cols-3 gap-6">
-          <div className="md:col-span-2 space-y-4">
-            {items.map(it => (
-              <div key={it.variantId} className="flex items-center gap-4 border rounded p-3">
-                <img src={it.image || '/placeholder.jpg'} className="w-20 h-20 object-cover rounded" alt="" />
-                <div className="flex-1">
-                  <div className="font-medium">{it.name}</div>
-                  <div className="text-sm text-muted-foreground">{it.size} • {it.scent}</div>
-                  <div className="text-sm">R {(it.priceCents/100).toFixed(2)} each</div>
-                </div>
-                <input type="number" value={it.qty} min={1} onChange={(e)=>setQty(it.variantId, parseInt(e.target.value||'1'))} className="w-16 border rounded px-2 py-1"/>
-                <Button variant="ghost" onClick={()=>remove(it.variantId)}>Remove</Button>
-              </div>
-            ))}
+    <div style={{ background: Palette.pinkBg, minHeight: "100vh" }}>
+      <header className="sticky top-0 z-10 backdrop-blur"
+              style={{ background: `${Palette.pinkBg}cc`, borderBottom: `1px solid ${Palette.gold}` }}>
+        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded-full" style={{ background: Palette.gold }} />
+            <span className="font-serif text-xl" style={{ color: Palette.text }}>Serene Bathworks</span>
           </div>
-          <div className="border rounded p-4 space-y-2 h-fit">
-            <div className="flex justify-between"><span>Subtotal</span><span>R {(t.subtotal/100).toFixed(2)}</span></div>
-            <div className="flex justify-between"><span>Shipping</span><span>{t.shipping===0 ? 'Free' : `R ${(t.shipping/100).toFixed(2)}`}</span></div>
-            <div className="flex justify-between font-semibold text-lg"><span>Total</span><span>R {(t.total/100).toFixed(2)}</span></div>
-            <Link href="/checkout" className="block mt-2"><Button className="w-full">Checkout</Button></Link>
-          </div>
+          <nav className="flex items-center gap-6" style={{ color: Palette.text }}>
+            <a href="/">Shop</a>
+            <a href="/contact">Contact</a>
+            <button className="px-4 py-2 rounded-xl" style={{ background: Palette.text, color: Palette.pinkBg }}>
+              Cart (0)
+            </button>
+          </nav>
         </div>
-      )}
-    </main>
-  )
+      </header>
+
+      <main className="max-w-6xl mx-auto px-6 py-10 space-y-12">
+        <section className="rounded-3xl p-10 text-center bg-white" style={{ border: `1px solid ${Palette.gold}` }}>
+          <h1 className="font-serif text-4xl" style={{ color: Palette.text }}>
+            Transform Your Bath Into a Sanctuary
+          </h1>
+          <p className="mt-3 max-w-2xl mx-auto" style={{ color: Palette.text }}>
+            Explore bath bombs, salts, and steamers. Choose a scent—images swap instantly.
+          </p>
+        </section>
+
+        {categories.map(cat => (
+          <section key={cat.id} className="space-y-6">
+            <h2 className="font-serif text-3xl" style={{ color: Palette.text }}>{cat.name}</h2>
+            {cat.products.map(p => (
+              <ClientProductCard key={p.id} product={p as any} />
+            ))}
+          </section>
+        ))}
+      </main>
+
+      <footer className="mt-20 py-10" style={{ borderTop: `1px solid ${Palette.gold}` }}>
+        <div className="max-w-6xl mx-auto px-6 text-sm" style={{ color: Palette.text }}>
+          © {new Date().getFullYear()} Serene Bathworks — Crafted with care.
+        </div>
+      </footer>
+    </div>
+  );
 }

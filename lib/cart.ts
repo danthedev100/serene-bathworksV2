@@ -26,16 +26,24 @@ export const useCart = create<CartState>()(
     (set, get) => ({
       items: [],
       add: (item) => {
-        const ex = get().items.find(i => i.variantId === item.variantId)
-        if (ex) set({ items: get().items.map(i => i.variantId === item.variantId ? { ...i, qty: i.qty + item.qty } : i) })
+        const ex = get().items.find((i) => i.variantId === item.variantId)
+        if (ex)
+          set({
+            items: get().items.map((i) =>
+              i.variantId === item.variantId ? { ...i, qty: i.qty + item.qty } : i,
+            ),
+          })
         else set({ items: [...get().items, item] })
       },
-      remove: (id) => set({ items: get().items.filter(i => i.variantId !== id) }),
-      setQty: (id, qty) => set({ items: get().items.map(i => i.variantId === id ? { ...i, qty: Math.max(1, qty) } : i) }),
+      remove: (id) => set({ items: get().items.filter((i) => i.variantId !== id) }),
+      setQty: (id, qty) =>
+        set({
+          items: get().items.map((i) => (i.variantId === id ? { ...i, qty: Math.max(1, qty) } : i)),
+        }),
       clear: () => set({ items: [] }),
     }),
-    { name: 'sbw-cart' }
-  )
+    { name: 'sbw-cart' },
+  ),
 )
 
 export const totals = (items: CartItem[]) => {
