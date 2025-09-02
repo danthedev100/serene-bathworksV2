@@ -29,6 +29,6 @@
     ".next/types/**/*.ts",
     "prisma/seed.js",
     "next.config.mjs"
-, "prisma/scripts/import-products-from-csv.js"  ],
+, "scripts/import-products-from-csv.js"  ],
   "exclude": ["node_modules"]
 }

@@ -1,5 +1,13 @@
-datasource db { provider = "postgresql" url = env("DATABASE_URL") }
-generator client { provider = "prisma-client-js" }
+// prisma/schema.prisma
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
 
 model Category {
   id        String    @id @default(cuid())
@@ -24,20 +32,21 @@ model Product {
 }
 
 model Variant {
-  id           String   @id @default(cuid())
-  productId    String
-  product      Product  @relation(fields: [productId], references: [id])
-  label        String               // “Rosemary”, “Lavender”, etc.
-  size         String?              // “60g”, “100g”, “500g” (optional for later)
-  priceZAR     Int
-  stock        Int       @default(0) // 0 = unavailable
-  whatsappSku  String?
-  scentNotes   String?
-  tags         String[]  @default([])
-  imageUrl     String                // e.g. "/images/bath-bombs-rose.png"
-  active       Boolean   @default(true) // can soft-disable variants
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+  id          String      @id @default(cuid())
+  productId   String
+  product     Product     @relation(fields: [productId], references: [id])
+  label       String
+  size        String?
+  priceZAR    Int         @default(0)
+  stock       Int         @default(0)
+  whatsappSku String?
+  scentNotes  String?
+  tags        String[]    @default([])
+  imageUrl    String      @default("/images/placeholder.png")
+  active      Boolean     @default(true)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  orderItems  OrderItem[]
 }
 
 model ContactMessage {

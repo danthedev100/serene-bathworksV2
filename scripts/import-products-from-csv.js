@@ -1,4 +1,4 @@
-// Plain JS importer: node scripts/import-products-from-csv.js
+// scripts/import-products-from-csv.js
 const fs = require("node:fs");
 const path = require("node:path");
 const { parse } = require("csv-parse/sync");
@@ -7,6 +7,10 @@ const prisma = new PrismaClient();
 
 async function main() {
   const csvPath = path.resolve(process.cwd(), "data/products.csv");
+  if (!fs.existsSync(csvPath)) {
+    throw new Error(`CSV file not found at ${csvPath}`);
+  }
+
   const content = fs.readFileSync(csvPath, "utf8");
   const rows = parse(content, { columns: true, skip_empty_lines: true });
 
@@ -38,14 +42,12 @@ async function main() {
 
     const filename = (r.images || "").trim();
     const imageUrl = filename.startsWith("/") ? filename : `/images/${filename}`;
-    const tags = r.tags ? r.tags.split(/[|,]/).map(s=>s.trim()).filter(Boolean) : [];
+    const tags = r.tags ? r.tags.split(/[|,]/).map(s => s.trim()).filter(Boolean) : [];
 
-    // availability = (active && stock > 0)
     await prisma.variant.create({
       data: {
-        id: r.id && r.id.length ? r.id : undefined,
         productId: product.id,
-        label: r.name,           // or map to scent if you have a dedicated column
+        label: r.name,
         size: r.size || null,
         priceZAR: Number(r.priceZAR || 0),
         stock: Number(r.stock || 0),
@@ -55,8 +57,8 @@ async function main() {
         imageUrl,
         active: String(r.active).toLowerCase() === "true",
       },
-    }).catch(async e => {
-      // if duplicate id in CSV, fallback to upsert by (productId, label, size) combo using a poor-man’s strategy
+    }).catch(async () => {
+      // fallback: update if already exists
       await prisma.variant.updateMany({
         where: { productId: product.id, label: r.name, size: r.size || null },
         data: {
@@ -71,7 +73,13 @@ async function main() {
       });
     });
   }
+
   console.log("CSV import complete.");
 }
 
-main().finally(()=>prisma.$disconnect());
+main()
+  .catch(err => {
+    console.error(err);
+    process.exit(1);
+  })
+  .finally(() => prisma.$disconnect());

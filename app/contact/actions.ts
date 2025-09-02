@@ -1,6 +1,5 @@
 "use server";
-import { PrismaClient } from "@prisma/client";
-const prisma = new PrismaClient();
+import { prisma } from "@/lib/prisma";
 
 export async function submitContact(formData: FormData) {
   const name = String(formData.get("name") || "");

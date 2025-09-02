@@ -1,8 +1,6 @@
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 import { Palette } from "@/lib/palette";
 import ClientProductCard from "@/components/ClientProductCard";
-
-const prisma = new PrismaClient();
 
 export default async function Page() {
   const categories = await prisma.category.findMany({
