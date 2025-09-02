@@ -1,0 +1,80 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Category {
+  id       String    @id @default(cuid())
+  name     String
+  slug     String    @unique
+  products Product[]
+}
+
+model Product {
+  id          String    @id @default(cuid())
+  name        String
+  slug        String    @unique
+  description String
+  images      Json
+  categoryId  String
+  category    Category  @relation(fields: [categoryId], references: [id])
+  variants    Variant[]
+  createdAt   DateTime  @default(now())
+}
+
+model Variant {
+  id         String      @id @default(cuid())
+  productId  String
+  product    Product     @relation(fields: [productId], references: [id])
+  sku        String      @unique
+  size       String
+  scent      String
+  priceCents Int
+  stock      Int         @default(0)
+  active     Boolean     @default(true)
+  image      String?
+  OrderItem  OrderItem[]
+
+  @@unique([productId, size, scent])
+}
+
+enum OrderStatus {
+  DRAFT
+  PENDING
+  PAID
+  CANCELED
+}
+
+model Order {
+  id            String      @id @default(cuid())
+  status        OrderStatus @default(PENDING)
+  email         String
+  name          String
+  phone         String
+  addressLine1  String
+  addressLine2  String?
+  city          String
+  postalCode    String
+  subtotalCents Int
+  shippingCents Int
+  totalCents    Int
+  pfPaymentId   String?
+  pfSignature   String?
+  pfRaw         Json?
+  createdAt     DateTime    @default(now())
+  items         OrderItem[]
+}
+
+model OrderItem {
+  id               String  @id @default(cuid())
+  orderId          String
+  order            Order   @relation(fields: [orderId], references: [id])
+  variantId        String
+  variant          Variant @relation(fields: [variantId], references: [id])
+  qty              Int
+  priceCentsAtSale Int
+}
