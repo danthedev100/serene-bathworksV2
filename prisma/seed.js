@@ -4,10 +4,9 @@ const prisma = new PrismaClient()
 
 // helpers
 const cents = (r) => Math.round(r * 100)
-const SKU = (...parts) => parts.join('-').toUpperCase()
 
+// Reset catalog tables
 async function resetCatalog() {
-  // Safe reset of catalog-only data (orders first just in case)
   await prisma.orderItem.deleteMany({})
   await prisma.order.deleteMany({})
   await prisma.variant.deleteMany({})
@@ -15,6 +14,7 @@ async function resetCatalog() {
   await prisma.category.deleteMany({})
 }
 
+// Category upsert
 async function upsertCategory(name, slug) {
   return prisma.category.upsert({
     where: { slug },
@@ -23,46 +23,31 @@ async function upsertCategory(name, slug) {
   })
 }
 
-async function upsertProduct({ name, slug, categoryId, description, images }) {
+// Product upsert
+async function upsertProduct({ name, slug, categoryId, description }) {
   return prisma.product.upsert({
     where: { slug },
     update: {},
-    create: { name, slug, categoryId, description, images },
+    create: { name, slug, categoryId, description },
   })
 }
 
-// Use composite unique for upsert: productId + size + scent
-async function upsertVariantByCombo(productId, v) {
-  return prisma.variant.upsert({
-    where: {
-      productId_size_scent: {
-        productId,
-        size: v.size,
-        scent: v.scent,
-      },
-    },
-    update: {
-      sku: v.sku,
-      priceCents: v.priceCents,
-      stock: v.stock,
-      active: v.active,
-      image: v.image,
-    },
-    create: {
+// Variant upsert (maps scent → label, priceCents → priceZAR, image → imageUrl)
+async function upsertVariant(productId, v) {
+  return prisma.variant.create({
+    data: {
       productId,
-      sku: v.sku,
+      label: v.scent, // use scent as label
       size: v.size,
-      scent: v.scent,
-      priceCents: v.priceCents,
+      priceZAR: Math.round(v.priceCents / 100),
       stock: v.stock,
       active: v.active,
-      image: v.image,
+      imageUrl: v.image,
     },
   })
 }
 
 async function main() {
-  // OPTIONAL: wipe and seed clean to avoid old duplicates while developing
   await resetCatalog()
 
   // --- Categories ---
@@ -77,7 +62,6 @@ async function main() {
     slug: 'bath-salts',
     categoryId: catSalts.id,
     description: 'Mineral-rich Epsom & Himalayan salt blend infused with essential oils.',
-    images: ['/images/bath-salts-hero.jpg'],
   })
 
   const saltScents = ['Rosemary', 'Rose', 'Lavender', 'Eucalyptus', 'Lemon', 'Lemongrass']
@@ -87,8 +71,7 @@ async function main() {
   ]
   for (const scent of saltScents) {
     for (const { size, price } of saltSizes) {
-      await upsertVariantByCombo(salts.id, {
-        sku: SKU('SALTS', size, scent),
+      await upsertVariant(salts.id, {
         size,
         scent,
         priceCents: price,
@@ -105,13 +88,11 @@ async function main() {
     slug: 'bath-bombs',
     categoryId: catBombs.id,
     description: 'Fizzy, skin-loving bath bombs — cocoa butter + kaolin clay.',
-    images: ['/images/bath-bombs-hero.jpg'],
   })
 
   const bombScents = ['Rose', 'Lavender', 'Citrus', 'Vanilla']
   for (const [i, scent] of bombScents.entries()) {
-    await upsertVariantByCombo(bombs.id, {
-      sku: SKU('BOMB', '1PC', scent),
+    await upsertVariant(bombs.id, {
       size: '1 pc',
       scent,
       priceCents: cents(55 + i * 5),
@@ -120,8 +101,7 @@ async function main() {
       image: `/images/bath-bomb-${scent.toLowerCase()}.jpg`,
     })
   }
-  await upsertVariantByCombo(bombs.id, {
-    sku: 'BOMB-4PACK-MIX',
+  await upsertVariant(bombs.id, {
     size: '4 pack',
     scent: 'Mixed',
     priceCents: cents(199),
@@ -136,13 +116,11 @@ async function main() {
     slug: 'shower-steamers',
     categoryId: catSteamers.id,
     description: 'Aromatherapy steamers for the shower — menthol boosted.',
-    images: ['/images/shower-steamers-hero.jpg'],
   })
 
   const steamerScents = ['Eucalyptus', 'Peppermint', 'Citrus']
   for (const scent of steamerScents) {
-    await upsertVariantByCombo(steamers.id, {
-      sku: SKU('STEAMER', '3PK', scent),
+    await upsertVariant(steamers.id, {
       size: '3 pack',
       scent,
       priceCents: cents(120),
@@ -150,8 +128,7 @@ async function main() {
       active: true,
       image: `/images/shower-steamer-${scent.toLowerCase()}.jpg`,
     })
-    await upsertVariantByCombo(steamers.id, {
-      sku: SKU('STEAMER', '6PK', scent),
+    await upsertVariant(steamers.id, {
       size: '6 pack',
       scent,
       priceCents: cents(220),
@@ -167,11 +144,9 @@ async function main() {
     slug: 'relax-gift-set',
     categoryId: catGifts.id,
     description: 'A curated gift set: 500g salts + 2 bath bombs + 3 steamers.',
-    images: ['/images/gift-set-relax.jpg'],
   })
 
-  await upsertVariantByCombo(giftset.id, {
-    sku: 'GIFT-RELAX-LAVENDER',
+  await upsertVariant(giftset.id, {
     size: 'One size',
     scent: 'Lavender Suite',
     priceCents: cents(399),
@@ -179,8 +154,7 @@ async function main() {
     active: true,
     image: '/images/gift-set-relax.jpg',
   })
-  await upsertVariantByCombo(giftset.id, {
-    sku: 'GIFT-RELAX-ROSE',
+  await upsertVariant(giftset.id, {
     size: 'One size',
     scent: 'Rose Suite',
     priceCents: cents(399),

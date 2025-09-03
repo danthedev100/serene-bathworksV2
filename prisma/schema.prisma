@@ -15,7 +15,7 @@ model Category {
   slug      String    @unique
   products  Product[]
   createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  updatedAt DateTime  @default(now()) @updatedAt
 }
 
 model Product {
@@ -27,15 +27,13 @@ model Product {
   category    Category  @relation(fields: [categoryId], references: [id])
   variants    Variant[]
   active      Boolean   @default(true)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-}
+  }
 
 model Variant {
   id          String      @id @default(cuid())
   productId   String
   product     Product     @relation(fields: [productId], references: [id])
-  label       String
+  label       String      @default("Unknown") // 👈 Default added
   size        String?
   priceZAR    Int         @default(0)
   stock       Int         @default(0)
@@ -44,9 +42,7 @@ model Variant {
   tags        String[]    @default([])
   imageUrl    String      @default("/images/placeholder.png")
   active      Boolean     @default(true)
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
-  orderItems  OrderItem[]
+    orderItems  OrderItem[]
 }
 
 model ContactMessage {
@@ -56,7 +52,6 @@ model ContactMessage {
   phone     String?
   subject   String
   message   String
-  createdAt DateTime @default(now())
 }
 
 enum OrderStatus {
