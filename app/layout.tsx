@@ -4,10 +4,11 @@ import type { Metadata } from 'next'
 import MainNav from '@/components/navigation/MainNav'
 import Providers from './providers'
 import Footer from '@/components/navigation/Footer'
-import { Inter, Cormorant_Garamond } from "next/font/google";
+import { Inter, Cormorant } from "next/font/google";
+import { CartProvider } from "@/app/providers/cart-provider"
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
-const cormorant = Cormorant_Garamond({ subsets: ["latin"], variable: "--font-cormorant" });
+const cormorant = Cormorant({ subsets: ["latin"], variable: "--font-cormorant" });
 
 export const metadata: Metadata = {
   title: 'Serene Bathworks',
@@ -23,7 +24,9 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body className={`${inter.variable} ${cormorant.variable} font-sans`}>{children}</body>
+      <body>
+        <CartProvider>{children}</CartProvider>
+      </body>
     </html>
-  );
+  )
 }
