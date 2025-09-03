@@ -27,7 +27,7 @@ model Product {
   category    Category  @relation(fields: [categoryId], references: [id])
   variants    Variant[]
   active      Boolean   @default(true)
-  }
+}
 
 model Variant {
   id          String      @id @default(cuid())
@@ -42,16 +42,16 @@ model Variant {
   tags        String[]    @default([])
   imageUrl    String      @default("/images/placeholder.png")
   active      Boolean     @default(true)
-    orderItems  OrderItem[]
+  orderItems  OrderItem[]
 }
 
 model ContactMessage {
-  id        String   @id @default(cuid())
-  name      String
-  email     String
-  phone     String?
-  subject   String
-  message   String
+  id      String  @id @default(cuid())
+  name    String
+  email   String
+  phone   String?
+  subject String
+  message String
 }
 
 enum OrderStatus {

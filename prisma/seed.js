@@ -54,8 +54,7 @@ async function main() {
   const catSalts = await upsertCategory('Bath Salts', 'bath-salts')
   const catBombs = await upsertCategory('Bath Bombs', 'bath-bombs')
   const catSteamers = await upsertCategory('Shower Steamers', 'shower-steamers')
-  const catGifts = await upsertCategory('Gift Sets', 'gift-sets')
-
+  
   // --- Bath Salts ---
   const salts = await upsertProduct({
     name: 'Bath Salts',
@@ -138,32 +137,7 @@ async function main() {
     })
   }
 
-  // --- Gift Sets ---
-  const giftset = await upsertProduct({
-    name: 'Relax Gift Set',
-    slug: 'relax-gift-set',
-    categoryId: catGifts.id,
-    description: 'A curated gift set: 500g salts + 2 bath bombs + 3 steamers.',
-  })
-
-  await upsertVariant(giftset.id, {
-    size: 'One size',
-    scent: 'Lavender Suite',
-    priceCents: cents(399),
-    stock: 6,
-    active: true,
-    image: '/images/gift-set-relax.jpg',
-  })
-  await upsertVariant(giftset.id, {
-    size: 'One size',
-    scent: 'Rose Suite',
-    priceCents: cents(399),
-    stock: 6,
-    active: true,
-    image: '/images/gift-set-relax-rose.jpg',
-  })
-
-  console.log('✅ Seed completed with full catalog')
+   console.log('✅ Seed completed with full catalog')
 }
 
 main()

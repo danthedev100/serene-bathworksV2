@@ -11,7 +11,7 @@
     "import:products": "node scripts/import-from-csv.mjs data/products.csv"
   },
   "prisma": {
-    "seed": "node prisma/seed.js"
+    "seed": "node scripts/import-products-from-csv.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.1",
